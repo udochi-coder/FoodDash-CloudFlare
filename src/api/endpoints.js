@@ -1,0 +1,21 @@
+import api from './client';
+
+export const register = data => api.post('auth/register', data);
+export const login = data => api.post('auth/login', data);
+export const getMenu = () => api.get('menu');
+export const getCategories = () => api.get('categories');
+export const getCart = () => api.get('cart');
+export const addToCart = data => api.post('cart/items', data);
+export const updateCartItem = (id, data) => api.patch(`cart/items/${id}`, data);
+export const removeCartItem = id => api.delete(`cart/items/${id}`);
+export const clearCart = () => api.delete('cart');
+export const placeOrder = data => api.post('orders', data);
+export const getMyOrders = () => api.get('orders');
+export const getOrder = id => api.get(`orders/${id}`);
+export const getTodaysOrders = () => api.get('staff/orders');
+export const updateOrderStatus = (id, data) => api.patch(`staff/orders/${id}/status`, data);
+export const getMenuAdmin = () => api.get('staff/menu');
+export const createMenuItem = data => api.post('staff/menu', data);
+export const updateMenuItem = (id, data) => api.put(`staff/menu/${id}`, data);
+export const toggleAvailability = id => api.patch(`staff/menu/${id}/availability`);
+export const creatCategory = data => api.post('staff/categories', data);
