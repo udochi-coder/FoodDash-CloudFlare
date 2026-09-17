@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { getMyOrders } from '../api/endpoints';
 
 const STATUS_STYLE = {
-    PENDING:    { label: 'Pending',     cls: 'bg-amber-100 text-amber-700' },
-    CONFIRMED:  { label: 'Confirmed',   cls: 'bg-blue-100 text-blue-700' },
+    RECEIVED:   { label: 'Received',    cls: 'bg-amber-100 text-amber-700' },
     PREPARING:  { label: 'Preparing',   cls: 'bg-violet-100 text-violet-700' },
     READY:      { label: 'Ready',       cls: 'bg-pink-100 text-pink-700' },
     DELIVERED:  { label: 'Delivered',   cls: 'bg-emerald-100 text-emerald-700' },

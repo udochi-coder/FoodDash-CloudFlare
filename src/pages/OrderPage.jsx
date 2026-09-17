@@ -1,13 +1,12 @@
 import { useParams, Link } from 'react-router-dom';
 import { useOrderStatus } from '../hooks/useOrderStatus';
 
-const STATUS_STEPS = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'DELIVERED'];
+const STATUS_STEPS = ['RECEIVED', 'PREPARING', 'READY', 'DELIVERED'];
 
 const STATUS_META = {
-    PENDING:    { icon: '🕐', label: 'Order Received',    color: 'text-amber-600', bg: 'bg-amber-50' },
-    CONFIRMED:  { icon: '✅', label: 'Order Confirmed',   color: 'text-blue-600',  bg: 'bg-blue-50' },
+    RECEIVED:   { icon: '🕐', label: 'Order Received',    color: 'text-amber-600', bg: 'bg-amber-50' },
     PREPARING:  { icon: '👨‍🍳', label: 'Being Prepared',  color: 'text-violet-600', bg: 'bg-violet-50' },
-    READY:      { icon: '🛵', label: 'Out for Delivery', color: 'text-pink-600',   bg: 'bg-pink-50' },
+    READY:      { icon: '✅', label: 'Ready',             color: 'text-pink-600',   bg: 'bg-pink-50' },
     DELIVERED:  { icon: '🎉', label: 'Delivered!',        color: 'text-emerald-600', bg: 'bg-emerald-50' },
     PICKED_UP:  { icon: '🎉', label: 'Picked Up!',        color: 'text-emerald-600', bg: 'bg-emerald-50' },
     CANCELLED:  { icon: '❌', label: 'Cancelled',         color: 'text-red-500',    bg: 'bg-red-50' },
@@ -15,7 +14,7 @@ const STATUS_META = {
 
 export default function OrderPage() {
     const { id } = useParams();
-    const { order } = useOrderStatus(id);
+    const { order, isLive } = useOrderStatus(id);
 
     if (!order) return (
         <div className="flex items-center justify-center h-64">
@@ -27,9 +26,12 @@ export default function OrderPage() {
     );
 
     const orderId = order.ID ?? order.id;
-    const meta = STATUS_META[order.status] || STATUS_META.PENDING;
+    const meta = STATUS_META[order.status] || STATUS_META.RECEIVED;
     const currentStep = STATUS_STEPS.indexOf(order.status);
     const isFinal = ['DELIVERED', 'PICKED_UP', 'CANCELLED'].includes(order.status);
+    const progress = isFinal && order.status !== 'CANCELLED'
+        ? 100
+        : Math.max(0, (currentStep / (STATUS_STEPS.length - 1)) * 100);
 
     return (
         <div className="max-w-xl mx-auto">
@@ -40,7 +42,7 @@ export default function OrderPage() {
                 <p className="text-gray-500 text-sm mt-1">Order #{orderId}</p>
                 {!isFinal && (
                     <p className="text-xs text-gray-400 mt-2 animate-pulse">
-                        🔄 Refreshing every 5 seconds...
+                        {isLive ? '● Live updates connected' : 'Checking for updates…'}
                     </p>
                 )}
             </div>
@@ -72,7 +74,7 @@ export default function OrderPage() {
                     <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <div
                             className="h-full bg-gradient-to-r from-violet-600 to-pink-500 transition-all duration-700"
-                            style={{ width: `${Math.max(0, (currentStep / (STATUS_STEPS.length - 1)) * 100)}%` }}
+                            style={{ width: `${progress}%` }}
                         />
                     </div>
                 </div>

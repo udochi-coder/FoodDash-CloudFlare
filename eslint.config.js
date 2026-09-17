@@ -17,5 +17,10 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // API requests started by effects update state after their promise settles.
+      // The React 19 static rule cannot distinguish those from synchronous updates.
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ])

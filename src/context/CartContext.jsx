@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getCart } from '../api/endpoints';
 import { useAuth } from './AuthContext.jsx';
 
@@ -12,7 +12,7 @@ export function CartProvider({ children }) {
 
     const itemCount = cart?.items?.reduce((sum, i) => sum + i.quantity, 0) || 0;
 
-    const refreshCart = async () => {
+    const refreshCart = useCallback(async () => {
 
         if (!user) {
              setCart(null); return;
@@ -25,9 +25,9 @@ export function CartProvider({ children }) {
         catch {
              setCart(null);
         }
-    };
+    }, [user]);
 
-    useEffect(() => { refreshCart(); }, [user]);
+    useEffect(() => { refreshCart(); }, [refreshCart]);
 
     return (
         <CartContext.Provider value={{ cart, itemCount, refreshCart }}>
@@ -38,4 +38,7 @@ export function CartProvider({ children }) {
    
 }
 
- export const useCart = () => useContext(CartContext);
+// This hook intentionally lives beside its provider so consumers share one
+// context instance. It is not a Fast Refresh component export.
+// eslint-disable-next-line react-refresh/only-export-components
+export const useCart = () => useContext(CartContext);

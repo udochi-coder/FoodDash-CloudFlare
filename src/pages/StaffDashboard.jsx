@@ -1,14 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getTodaysOrders, updateOrderStatus } from '../api/endpoints';
 
-const STATUS_FLOW = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'DELIVERED'];
-
 const STATUS_STYLE = {
-    PENDING:    { label: 'Pending',     cls: 'bg-amber-100 text-amber-700 border-amber-200',      next: 'CONFIRMED',  action: 'Confirm' },
-    CONFIRMED:  { label: 'Confirmed',   cls: 'bg-blue-100 text-blue-700 border-blue-200',         next: 'PREPARING',  action: 'Start Preparing' },
+    RECEIVED:   { label: 'Received',    cls: 'bg-amber-100 text-amber-700 border-amber-200',      next: 'PREPARING',  action: 'Start Preparing' },
     PREPARING:  { label: 'Preparing',   cls: 'bg-violet-100 text-violet-700 border-violet-200',   next: 'READY',      action: 'Mark Ready' },
-    READY:      { label: 'Ready',       cls: 'bg-pink-100 text-pink-700 border-pink-200',         next: 'DELIVERED',  action: 'Mark Delivered' },
+    READY:      { label: 'Ready',       cls: 'bg-pink-100 text-pink-700 border-pink-200',         next: null,         action: null },
     DELIVERED:  { label: 'Delivered',   cls: 'bg-emerald-100 text-emerald-700 border-emerald-200', next: null,         action: null },
+    PICKED_UP:  { label: 'Picked Up',   cls: 'bg-emerald-100 text-emerald-700 border-emerald-200', next: null,         action: null },
     CANCELLED:  { label: 'Cancelled',   cls: 'bg-red-100 text-red-600 border-red-200',            next: null,         action: null },
 };
 
@@ -82,8 +80,8 @@ export default function StaffDashboard() {
             </div>
 
             {/* Stats bar */}
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-6">
-                {['ALL', 'PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'DELIVERED'].map(s => (
+            <div className="grid grid-cols-3 sm:grid-cols-7 gap-2 mb-6">
+                {['ALL', 'RECEIVED', 'PREPARING', 'READY', 'DELIVERED', 'PICKED_UP', 'CANCELLED'].map(s => (
                     <button
                         key={s}
                         onClick={() => setFilter(s)}
@@ -108,7 +106,18 @@ export default function StaffDashboard() {
                 <div className="space-y-4">
                     {filteredOrders.map(order => {
                         const orderId = order.ID ?? order.id;
-                        const s = STATUS_STYLE[order.status] || STATUS_STYLE.PENDING;
+                        const s = STATUS_STYLE[order.status] || {
+                            label: order.status,
+                            cls: 'bg-gray-100 text-gray-600 border-gray-200',
+                            next: null,
+                            action: null,
+                        };
+                        const nextStatus = order.status === 'READY'
+                            ? order.type === 'pickup' ? 'PICKED_UP' : 'DELIVERED'
+                            : s.next;
+                        const nextAction = order.status === 'READY'
+                            ? order.type === 'pickup' ? 'Mark Picked Up' : 'Mark Delivered'
+                            : s.action;
                         const date = new Date(order.created_at ?? order.CreatedAt);
                         return (
                             <div
@@ -129,16 +138,16 @@ export default function StaffDashboard() {
                                         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${s.cls}`}>
                                             {s.label}
                                         </span>
-                                        {s.next && (
+                                        {nextStatus && (
                                             <button
-                                                onClick={() => handleStatusUpdate(orderId, s.next)}
+                                                onClick={() => handleStatusUpdate(orderId, nextStatus)}
                                                 disabled={!!updatingId}
                                                 className="rounded-full bg-gradient-to-r from-violet-600 to-pink-500 px-3 py-1 text-xs font-semibold text-white transition-all duration-200 hover:brightness-110 disabled:opacity-50"
                                             >
-                                                {s.action} →
+                                                {nextAction} →
                                             </button>
                                         )}
-                                        {order.status !== 'CANCELLED' && order.status !== 'DELIVERED' && (
+                                        {!['CANCELLED', 'DELIVERED', 'PICKED_UP'].includes(order.status) && (
                                             <button
                                                 onClick={() => handleStatusUpdate(orderId, 'CANCELLED')}
                                                 disabled={!!updatingId}

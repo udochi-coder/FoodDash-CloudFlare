@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
     const { login } = useAuth();
@@ -8,6 +9,7 @@ export default function LoginPage() {
     const [form, setForm] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = async e => {
         e.preventDefault();
@@ -31,7 +33,7 @@ export default function LoginPage() {
                     <p className="mt-1 text-gray-500">Login to continue your order</p>
                 </div>
 
-                <div className="rounded-3xl border border-violet-100 bg-white/90 p-8 shadow-2xl shadow-violet-100 backdrop-blur">
+                <form onSubmit={handleSubmit} className="rounded-3xl border border-violet-100 bg-white/90 p-8 shadow-2xl shadow-violet-100 backdrop-blur">
                     <div className="space-y-4">
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
@@ -46,14 +48,24 @@ export default function LoginPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
-                            <input
-                                type="password"
-                                placeholder="••••••••"
-                                value={form.password}
-                                onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-                                className="w-full rounded-2xl border border-violet-100 bg-violet-50/50 px-4 py-3 text-sm transition-all duration-200 focus:border-violet-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-100"
-                                required
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    placeholder="••••••••"
+                                    value={form.password}
+                                    onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
+                                    className="w-full rounded-2xl border border-violet-100 bg-violet-50/50 px-4 py-3 pr-12 text-sm transition-all duration-200 focus:border-violet-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-100"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(value => !value)}
+                                    className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-gray-400 hover:text-violet-600"
+                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
                         </div>
 
                         {error && (
@@ -63,7 +75,7 @@ export default function LoginPage() {
                         )}
 
                         <button
-                            onClick={handleSubmit}
+                            type="submit"
                             disabled={loading}
                             className="mt-2 w-full rounded-2xl bg-gradient-to-r from-violet-600 to-pink-500 py-3 text-sm font-bold text-white transition-all duration-200 hover:brightness-110 disabled:opacity-50 active:scale-95"
                         >
@@ -77,7 +89,7 @@ export default function LoginPage() {
                             Create one
                         </Link>
                     </p>
-                </div>
+                </form>
             </div>
         </div>
     );

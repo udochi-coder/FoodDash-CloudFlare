@@ -13,8 +13,7 @@ export default function CartPage() {
 
     const items = cart?.items || [];
     const subtotal = items.reduce((sum, i) => sum + Number(i.menu_item?.price) * i.quantity, 0);
-    const deliveryFee = subtotal > 0 ? 500 : 0;
-    const total = subtotal + deliveryFee;
+    const total = subtotal;
 
     const handleQty = async (itemId, newQty) => {
         setUpdatingId(itemId);
@@ -196,10 +195,6 @@ export default function CartPage() {
                     <div className="flex justify-between text-gray-600">
                         <span>Subtotal</span>
                         <span>₦{subtotal.toLocaleString('en-NG', { minimumFractionDigits: 2 })}</span>
-                    </div>
-                    <div className="flex justify-between text-gray-600">
-                        <span>Delivery fee</span>
-                        <span>₦{deliveryFee.toLocaleString('en-NG', { minimumFractionDigits: 2 })}</span>
                     </div>
                     <div className="h-px bg-gray-100 my-2" />
                     <div className="flex justify-between font-extrabold text-base text-gray-900">
