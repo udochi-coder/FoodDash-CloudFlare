@@ -14,11 +14,21 @@ export default function MenuPage() {
     const [adding, setAdding] = useState(null);
     const [added, setAdded] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    const imageFallback = (event) => {
+        event.currentTarget.style.display = 'none';
+        event.currentTarget.nextElementSibling?.classList.remove('hidden');
+    };
 
     useEffect(() => {
+        let mounted = true;
+
         getMenu()
             .then(({ data }) => {
-                const categories = data.data || [];
+                if (!mounted) return;
+
+                const categories = Array.isArray(data?.data) ? data.data : [];
                 setMenu(categories);
 
                 const firstCategory = categories[0];
@@ -27,7 +37,14 @@ export default function MenuPage() {
                     setTab(firstCategoryId);
                 }
             })
-            .finally(() => setLoading(false));
+            .catch(() => {
+                if (mounted) setError('The menu is temporarily unavailable. Please try again.');
+            })
+            .finally(() => {
+                if (mounted) setLoading(false);
+            });
+
+        return () => { mounted = false; };
     }, []);
 
     const handleAdd = async (menuItemId) => {
@@ -58,6 +75,21 @@ export default function MenuPage() {
                     <div className="animate-spin text-4xl mb-3">🍳</div>
                     <p className="text-gray-500">Loading menu...</p>
                 </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="rounded-3xl border border-red-100 bg-red-50 px-6 py-12 text-center">
+                <p className="font-semibold text-red-700">{error}</p>
+                <button
+                    type="button"
+                    onClick={() => window.location.reload()}
+                    className="mt-4 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                >
+                    Try again
+                </button>
             </div>
         );
     }
@@ -99,13 +131,19 @@ export default function MenuPage() {
                                 !item.is_available ? 'opacity-60' : ''
                             }`}
                         >
-                            {item.image_url ? (
-                                <img src={item.image_url} alt={item.name} className="w-full h-44 object-cover" />
-                            ) : (
-                                <div className="flex h-44 w-full items-center justify-center bg-gradient-to-br from-violet-100 via-fuchsia-50 to-pink-100 text-5xl">
+                            <div className="relative h-44 w-full">
+                                {item.image_url && (
+                                    <img
+                                        src={item.image_url}
+                                        alt={item.name}
+                                        onError={imageFallback}
+                                        className="h-44 w-full object-cover"
+                                    />
+                                )}
+                                <div className={`flex h-44 w-full items-center justify-center bg-gradient-to-br from-violet-100 via-fuchsia-50 to-pink-100 text-5xl ${item.image_url ? 'hidden' : ''}`}>
                                     🍽️
                                 </div>
-                            )}
+                            </div>
 
                             <div className="p-4 flex flex-col flex-1 gap-2">
                                 <div className="flex-1">
@@ -140,6 +178,14 @@ export default function MenuPage() {
                     );
                 })}
             </div>
+
+            {menu.length === 0 && (
+                <div className="rounded-3xl border border-violet-100 bg-white px-6 py-16 text-center shadow-sm">
+                    <div className="mb-3 text-5xl">🍽️</div>
+                    <p className="font-semibold text-gray-700">The menu is being prepared.</p>
+                    <p className="mt-1 text-sm text-gray-500">Please check back shortly.</p>
+                </div>
+            )}
 
             {activeCategory?.items?.length === 0 && (
                 <div className="text-center py-16 text-gray-400">
