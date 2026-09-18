@@ -1,6 +1,16 @@
 import axios from 'axios';
 
-export const API_BASE_URL = (import.meta.env.VITE_API_URL || 'VITE_API_URL=https://fooddash-api.onrender.com/api/v1')
+const defaultApiUrl = import.meta.env.PROD
+    ? 'https://fooddash-api.onrender.com/api/v1'
+    : 'http://localhost:8080/api/v1';
+
+const configuredApiUrl = (import.meta.env.VITE_API_URL || '')
+    .trim()
+    .replace(/^VITE_API_URL\s*=\s*/i, '')
+    .replace(/^['"]|['"]$/g, '')
+    .trim();
+
+export const API_BASE_URL = (configuredApiUrl || defaultApiUrl)
     .trim()
     .replace(/\/+$/, '');
 
