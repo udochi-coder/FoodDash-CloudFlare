@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const defaultApiUrl = import.meta.env.PROD
-    ? 'https://fooddash-api.onrender.com/api/v1'
+    ? 'https://fooddash-backend-wcl8.onrender.com/api/v1'
     : 'http://localhost:8080/api/v1';
 
 const configuredApiUrl = (import.meta.env.VITE_API_URL || '')
